@@ -8,6 +8,7 @@ verify_ssl = true
 [packages]
 django = "*"
 vizan = {git = "https://github.com/lv-csbg/VizAn.git",ref = "master"}
+djangorestframework = "*"
 
 [requires]
 python_version = "3.5"
