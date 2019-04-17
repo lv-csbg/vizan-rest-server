@@ -1,0 +1,13 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+
+[packages]
+django = "*"
+vizan = {git = "https://github.com/lv-csbg/VizAn.git",ref = "master"}
+
+[requires]
+python_version = "3.5"
