@@ -11,9 +11,6 @@ test_result_svg_0_8 = b'<svg:svg'
 
 # Create your tests here.
 class JSONRequestViewTests(TestCase):
-    def tearDown(self):
-        os.remove("prod_subst_0.svg")
-
     @staticmethod
     def create_example_json_data_file(model_filename, svg_filename):
         with open(model_filename, "rb") as f:

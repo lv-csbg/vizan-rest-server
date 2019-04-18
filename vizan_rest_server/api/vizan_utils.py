@@ -1,10 +1,11 @@
 from cobra.flux_analysis import flux_variability_analysis
 import cobra.io as cio
 import vizan
+import tempfile
 
 
 def perform_visualisation(model_filename, svg_filename, analysis_type='FBA',
-                          analysis_results=None):
+                          analysis_results=None, output_filename=None, intermediate_filename=None):
     model = cio.load_json_model(model_filename)
     if analysis_results is None:
         fba_results = model.optimize()
@@ -15,9 +16,10 @@ def perform_visualisation(model_filename, svg_filename, analysis_type='FBA',
             fva_results = flux_variability_analysis(model, fraction_of_optimum=0.5)
             fva_results = fva_results.round(3)
             analysis_results = fva_results
-
-    prod = 'prod'
-    subst = 'subst'
-    count = '0'
-    output_filename = "{}_{}_{}.svg".format(prod, subst, count)
-    vizan.call_vizan_cli(model, svg_filename, analysis_results, analysis_type, output_filename)
+    if output_filename is None:
+        output_file = tempfile.NamedTemporaryFile(mode="w")
+        output_filename = output_file.name
+    if intermediate_filename is None:
+        intermediate_file = tempfile.NamedTemporaryFile(mode="w")
+        intermediate_filename = intermediate_file.name
+    vizan.call_vizan_cli(model, svg_filename, analysis_results, analysis_type, output_filename, intermediate_filename)

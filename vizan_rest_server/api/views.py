@@ -28,16 +28,23 @@ class SnippetList(APIView):
         serializer = AnalysisSerializer(data=request.data)
         if serializer.is_valid():
             svg = base64.b64decode(serializer.validated_data["svg"])
-            model_stream = io.StringIO(serializer.validated_data["model"])
-            fp = tempfile.NamedTemporaryFile(mode="w")
-            with fp:
-                fp.write(svg.decode("utf-8"))
-                # read data from file
-                fp.seek(0)
-                perform_visualisation(model_stream, fp.name, analysis_type=serializer.validated_data["analysis_type"])
-                fp.close()
-            with open('prod_subst_0.svg', "rb") as f:
+            with tempfile.NamedTemporaryFile(mode="w", delete=False) as output_file:
+                with tempfile.NamedTemporaryFile(mode="w") as intermediate_file:
+                    with tempfile.NamedTemporaryFile(mode="wb") as svg_file:
+                        svg_file.write(svg)
+                        svg_file.seek(0)
+                        vizan_kwargs = {
+                            'model_filename': io.StringIO(serializer.validated_data['model']),
+                            'svg_filename': svg_file.name,
+                            'analysis_type': serializer.validated_data.get("analysis_type", None) or 'FBA',
+                            'output_filename': output_file.name,
+                            'intermediate_filename': intermediate_file.name,
+                        }
+                        perform_visualisation(**vizan_kwargs)
+                        output_filename = output_file.name
+            with open(output_filename, "rb") as f:
                 result_svg = f.read()
+            os.remove(output_filename)
             result_svg_encoded = base64.b64encode(result_svg)
             res = {
                 'result': result_svg_encoded.decode("utf-8")
@@ -59,12 +66,15 @@ class Analysis2List(APIView):
     def post(self, request, format=None):
         serializer = Analysis2Serializer(data=request.data)
         if serializer.is_valid():
-            vizan_kwargs = {
-                'model_filename': serializer.validated_data['model'].temporary_file_path(),
-                'svg_filename': serializer.validated_data['svg'].temporary_file_path(),
-                'analysis_type': serializer.validated_data.get("analysis_type", None) or 'FBA'
-            }
-            perform_visualisation(**vizan_kwargs)
-            output_file_path = 'prod_subst_0.svg'
-            return serve(request, os.path.basename(output_file_path), os.getcwd())
+            with tempfile.NamedTemporaryFile(mode="w", delete=False) as output_file:
+                with tempfile.NamedTemporaryFile(mode="w") as intermediate_file:
+                    vizan_kwargs = {
+                        'model_filename': serializer.validated_data['model'].temporary_file_path(),
+                        'svg_filename': serializer.validated_data['svg'].temporary_file_path(),
+                        'analysis_type': serializer.validated_data.get("analysis_type", None) or 'FBA',
+                        'output_filename': output_file.name,
+                        'intermediate_filename': intermediate_file.name,
+                    }
+                    perform_visualisation(**vizan_kwargs)
+            return serve(request, os.path.basename(output_file.name), os.path.dirname(output_file.name))
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
