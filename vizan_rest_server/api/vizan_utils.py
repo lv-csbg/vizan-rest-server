@@ -13,7 +13,7 @@ def perform_visualisation(model_filename, svg_filename, analysis_type='FBA',
             analysis_results = fba_results
         elif analysis_type == 'FVA':
             fva_results = flux_variability_analysis(model, fraction_of_optimum=0.5)
-            fva_results.round(3)
+            fva_results = fva_results.round(3)
             analysis_results = fva_results
 
     prod = 'prod'
