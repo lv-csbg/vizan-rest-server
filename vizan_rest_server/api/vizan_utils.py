@@ -12,7 +12,9 @@ def perform_visualisation(model_filename, svg_filename, analysis_type='FBA',
                           analysis_results=None, output_filename=None, intermediate_filename=None):
     model = cio.load_json_model(model_filename)
     if analysis_results is None:
-        analysis_results = perform_analysis(model, analysis_type)
+        model, analysis_results = perform_analysis(model, analysis_type)
+    else:
+        model.optimize()
     if output_filename is None:
         output_file = tempfile.NamedTemporaryFile(mode="w")
         output_filename = output_file.name
@@ -31,11 +33,11 @@ def perform_analysis(model, analysis_type):
         fva_results = flux_variability_analysis(model, fraction_of_optimum=0.5)
         fva_results = fva_results.round(3)
         analysis_results = fva_results
-    return analysis_results
+    return model, analysis_results
 
 
 def analysis_in_json(model, analysis_type):
-    analysis_results = perform_analysis(model, analysis_type)
+    model, analysis_results = perform_analysis(model, analysis_type)
     if analysis_type == 'FBA':
         results_json = json.dumps(analysis_results, cls=CobraSolutionEncoder)
     elif analysis_type == 'FVA':

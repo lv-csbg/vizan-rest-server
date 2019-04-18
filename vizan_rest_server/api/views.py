@@ -4,6 +4,7 @@ import json
 import os
 import tempfile
 
+import pandas as pd
 from django.views.static import serve
 from rest_framework import status
 from rest_framework.response import Response
@@ -72,15 +73,18 @@ class Analysis2List(APIView):
         if serializer.is_valid():
             with tempfile.NamedTemporaryFile(mode="w", delete=False) as output_file:
                 with tempfile.NamedTemporaryFile(mode="w") as intermediate_file:
+                    analysis_type = serializer.validated_data.get("analysis_type", None) or 'FBA'
                     analysis_results = serializer.validated_data.get('analysis_results', None)
                     if analysis_results is not None:
-                        # analysis_file = analysis_results.temporary_file_path()
                         with open(serializer.validated_data['analysis_results'].temporary_file_path()) as f:
-                            analysis_results = json.load(f, cls=CobraSolutionDecoder)
+                            if analysis_type == 'FBA':
+                                analysis_results = json.load(f, cls=CobraSolutionDecoder)
+                            if analysis_type == 'FVA':
+                                analysis_results = pd.read_json(f, typ='frame'),
                     vizan_kwargs = {
                         'model_filename': serializer.validated_data['model'].temporary_file_path(),
                         'svg_filename': serializer.validated_data['svg'].temporary_file_path(),
-                        'analysis_type': serializer.validated_data.get("analysis_type", None) or 'FBA',
+                        'analysis_type': analysis_type,
                         'analysis_results': analysis_results,
                         'output_filename': output_file.name,
                         'intermediate_filename': intermediate_file.name,

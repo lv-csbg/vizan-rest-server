@@ -59,9 +59,8 @@ class FormRequestViewTests(TestCase):
         content = response.getvalue()
         self.assertEqual(content[:8], test_result_svg_0_8)
 
-    def test_submit_form_data_with_results(self):
+    def submit_form_data_with_results(self, test_analysis_type):
         model = load_json_model(test_model_filename)
-        test_analysis_type = 'FBA'
         analysis_json = analysis_in_json(model, test_analysis_type)
         data = {
             'model': open(test_model_filename, 'rb'),
@@ -75,3 +74,9 @@ class FormRequestViewTests(TestCase):
         self.assertEqual(response.streaming, True)
         content = response.getvalue()
         self.assertEqual(content[:8], test_result_svg_0_8)
+
+    def test_submit_form_data_with_results_FBA(self):
+        self.submit_form_data_with_results('FBA')
+
+    def test_submit_form_data_with_results_FVA(self):
+        self.submit_form_data_with_results('FVA')
