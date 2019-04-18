@@ -2,7 +2,6 @@ from django.test import TestCase
 from django.urls import reverse
 import base64
 import json
-import os
 
 test_model_filename = 'api/test_data/iML1515.json'
 test_svg_filename = 'api/test_data/E_coli_source.svg'
