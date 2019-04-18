@@ -1,7 +1,12 @@
-from django.test import TestCase
-from django.urls import reverse
 import base64
 import json
+from io import StringIO
+
+from cobra.io import load_json_model
+from django.test import TestCase
+from django.urls import reverse
+
+from .vizan_utils import analysis_in_json
 
 test_model_filename = 'api/test_data/iML1515.json'
 test_svg_filename = 'api/test_data/E_coli_source.svg'
@@ -46,6 +51,23 @@ class FormRequestViewTests(TestCase):
             'model': open(test_model_filename, 'rb'),
             'svg': open(test_svg_filename, 'rb'),
             'analysis_type': 'FBA',
+        }
+        response = self.client.post(reverse('api:form_request'), data=data)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.as_attachment, False)
+        self.assertEqual(response.streaming, True)
+        content = response.getvalue()
+        self.assertEqual(content[:8], test_result_svg_0_8)
+
+    def test_submit_form_data_with_results(self):
+        model = load_json_model(test_model_filename)
+        test_analysis_type = 'FBA'
+        analysis_json = analysis_in_json(model, test_analysis_type)
+        data = {
+            'model': open(test_model_filename, 'rb'),
+            'svg': open(test_svg_filename, 'rb'),
+            'analysis_type': test_analysis_type,
+            'analysis_results': StringIO(analysis_json),
         }
         response = self.client.post(reverse('api:form_request'), data=data)
         self.assertEqual(response.status_code, 200)

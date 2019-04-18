@@ -1,14 +1,18 @@
-from .models import Analysis, Analysis2
-from .serializers import AnalysisSerializer, Analysis2Serializer
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
 import base64
 import io
-from .vizan_utils import perform_visualisation
-import tempfile
-from django.views.static import serve
+import json
 import os
+import tempfile
+
+from django.views.static import serve
+from rest_framework import status
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+from .json_utils import CobraSolutionDecoder
+from .models import Analysis, Analysis2
+from .serializers import AnalysisSerializer, Analysis2Serializer
+from .vizan_utils import perform_visualisation
 
 
 # Create your views here.
@@ -68,10 +72,16 @@ class Analysis2List(APIView):
         if serializer.is_valid():
             with tempfile.NamedTemporaryFile(mode="w", delete=False) as output_file:
                 with tempfile.NamedTemporaryFile(mode="w") as intermediate_file:
+                    analysis_results = serializer.validated_data.get('analysis_results', None)
+                    if analysis_results is not None:
+                        # analysis_file = analysis_results.temporary_file_path()
+                        with open(serializer.validated_data['analysis_results'].temporary_file_path()) as f:
+                            analysis_results = json.load(f, cls=CobraSolutionDecoder)
                     vizan_kwargs = {
                         'model_filename': serializer.validated_data['model'].temporary_file_path(),
                         'svg_filename': serializer.validated_data['svg'].temporary_file_path(),
                         'analysis_type': serializer.validated_data.get("analysis_type", None) or 'FBA',
+                        'analysis_results': analysis_results,
                         'output_filename': output_file.name,
                         'intermediate_filename': intermediate_file.name,
                     }
