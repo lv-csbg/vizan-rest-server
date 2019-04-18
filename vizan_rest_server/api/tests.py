@@ -46,28 +46,23 @@ class JSONRequestViewTests(TestCase):
 
 
 class FormRequestViewTests(TestCase):
-    def test_submit_form_data(self):
-        data = {
-            'model': open(test_model_filename, 'rb'),
-            'svg': open(test_svg_filename, 'rb'),
-            'analysis_type': 'FBA',
-        }
-        response = self.client.post(reverse('api:form_request'), data=data)
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.as_attachment, False)
-        self.assertEqual(response.streaming, True)
-        content = response.getvalue()
-        self.assertEqual(content[:8], test_result_svg_0_8)
-
-    def submit_form_data_with_results(self, test_analysis_type):
-        model = load_json_model(test_model_filename)
-        analysis_json = analysis_in_json(model, test_analysis_type)
+    @staticmethod
+    def get_form_data(test_analysis_type, with_analysis=False):
         data = {
             'model': open(test_model_filename, 'rb'),
             'svg': open(test_svg_filename, 'rb'),
             'analysis_type': test_analysis_type,
-            'analysis_results': StringIO(analysis_json),
         }
+        if with_analysis:
+            return data
+        else:
+            model = load_json_model(test_model_filename)
+            analysis_json = analysis_in_json(model, test_analysis_type)
+            data['analysis_results'] = StringIO(analysis_json)
+            return data
+
+    def submit_form_data(self, test_analysis_type, with_analysis=False):
+        data = self.get_form_data(test_analysis_type, with_analysis)
         response = self.client.post(reverse('api:form_request'), data=data)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.as_attachment, False)
@@ -75,8 +70,14 @@ class FormRequestViewTests(TestCase):
         content = response.getvalue()
         self.assertEqual(content[:8], test_result_svg_0_8)
 
+    def test_submit_form_data_FBA(self):
+        self.submit_form_data('FBA')
+
+    def test_submit_form_data_FVA(self):
+        self.submit_form_data('FVA')
+
     def test_submit_form_data_with_results_FBA(self):
-        self.submit_form_data_with_results('FBA')
+        self.submit_form_data(test_analysis_type='FBA', with_analysis=True)
 
     def test_submit_form_data_with_results_FVA(self):
-        self.submit_form_data_with_results('FVA')
+        self.submit_form_data(test_analysis_type='FVA', with_analysis=True)
