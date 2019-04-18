@@ -9,6 +9,8 @@ verify_ssl = true
 django = "*"
 vizan = {git = "https://github.com/lv-csbg/VizAn.git",ref = "master"}
 djangorestframework = "*"
+cobra = "*"
+pandas = "*"
 
 [requires]
 python_version = "3.5"
