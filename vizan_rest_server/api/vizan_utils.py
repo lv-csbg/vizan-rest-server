@@ -19,5 +19,5 @@ def perform_visualisation(model_filename, svg_filename, analysis_type='FBA',
     prod = 'prod'
     subst = 'subst'
     count = '0'
-    vizan.call_vizan_cli(model, svg_filename, analysis_results, analysis_type,
-                         "{}_{}_{}.svg".format(prod, subst, count))
+    output_filename = "{}_{}_{}.svg".format(prod, subst, count)
+    vizan.call_vizan_cli(model, svg_filename, analysis_results, analysis_type, output_filename)
