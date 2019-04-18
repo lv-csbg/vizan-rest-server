@@ -4,6 +4,10 @@ import base64
 import json
 import os
 
+test_model_filename = 'api/test_data/iML1515.json'
+test_svg_filename = 'api/test_data/E_coli_source.svg'
+test_result_svg_0_8 = b'<svg:svg'
+
 
 # Create your tests here.
 class JSONRequestViewTests(TestCase):
@@ -32,9 +36,24 @@ class JSONRequestViewTests(TestCase):
 
     def test_submit_json_data(self):
         data = self.create_example_json_data_file(
-            model_filename='api/test_data/iML1515.json', svg_filename='api/test_data/E_coli_source.svg')
+            model_filename=test_model_filename, svg_filename=test_svg_filename)
         response = self.client.post(reverse('api:json_request'), data)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.accepted_media_type, 'application/json')
         decoded_content = self.parse_json_response_content(response.content)
-        self.assertEqual(decoded_content[:8], b'<svg:svg')
+        self.assertEqual(decoded_content[:8], test_result_svg_0_8)
+
+
+class FormRequestViewTests(TestCase):
+    def test_submit_form_data(self):
+        data = {
+            'model': open(test_model_filename, 'rb'),
+            'svg': open(test_svg_filename, 'rb'),
+            'analysis_type': 'FBA',
+        }
+        response = self.client.post(reverse('api:form_request'), data=data)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.as_attachment, False)
+        self.assertEqual(response.streaming, True)
+        content = response.getvalue()
+        self.assertEqual(content[:8], test_result_svg_0_8)

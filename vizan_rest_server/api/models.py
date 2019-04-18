@@ -11,3 +11,12 @@ class Analysis(models.Model):
 
     class Meta:
         ordering = ('model',)
+
+
+class Analysis2(models.Model):
+    model = models.FileField()
+    svg = models.FileField()
+    analysis_type = models.CharField(choices=ANALYSIS_TYPES, max_length=3, blank=False, default='FBA')
+
+    class Meta:
+        ordering = ('model',)
