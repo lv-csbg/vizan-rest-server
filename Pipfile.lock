@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "d93ba4921a388bc9b6a4ee5daa9b97e44554ae6de51052689d73aab65a971718"
+            "sha256": "f7f0af8093e7677727a148b5333d97b14a7df2d2c87a19671af4975b8238c89b"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -259,6 +259,13 @@
                 "sha256:8af07a39377cee1103a5c8b3330a421c2d99b9141e9cc5ddd2e3263fea416943"
             ],
             "version": "==0.8.3"
+        },
+        "uwsgi": {
+            "hashes": [
+                "sha256:4972ac538800fb2d421027f49b4a1869b66048839507ccf0aa2fda792d99f583"
+            ],
+            "index": "pypi",
+            "version": "==2.0.18"
         },
         "vizan": {
             "git": "https://github.com/lv-csbg/VizAn.git",

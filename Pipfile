@@ -11,6 +11,7 @@ vizan = {git = "https://github.com/lv-csbg/VizAn.git",ref = "master"}
 djangorestframework = "*"
 cobra = "*"
 pandas = "*"
+uwsgi = "*"
 
 [requires]
 python_version = "3.5"
