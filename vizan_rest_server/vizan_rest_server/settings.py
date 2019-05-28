@@ -130,4 +130,6 @@ DATA_UPLOAD_MAX_MEMORY_SIZE = 100 * 1024 * 1024
 
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 10
 
+FILE_UPLOAD_HANDLERS = ("django.core.files.uploadhandler.TemporaryFileUploadHandler",)
+
 STATIC_ROOT = '/srv/static-files'
