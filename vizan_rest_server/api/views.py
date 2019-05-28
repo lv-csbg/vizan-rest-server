@@ -3,6 +3,7 @@ import io
 import json
 import os
 import tempfile
+import traceback
 
 import pandas as pd
 from django.views.static import serve
@@ -14,6 +15,8 @@ from .json_utils import CobraSolutionDecoder
 from .models import Analysis, Analysis2
 from .serializers import AnalysisSerializer, Analysis2Serializer
 from .vizan_utils import perform_visualisation
+
+from xml.parsers.expat import ExpatError
 
 
 # Create your views here.
@@ -71,24 +74,47 @@ class Analysis2List(APIView):
     def post(self, request, format=None):
         serializer = Analysis2Serializer(data=request.data)
         if serializer.is_valid():
-            with tempfile.NamedTemporaryFile(mode="w", delete=False) as output_file:
-                with tempfile.NamedTemporaryFile(mode="w") as intermediate_file:
-                    analysis_type = serializer.validated_data.get("analysis_type", None) or 'FBA'
-                    analysis_results = serializer.validated_data.get('analysis_results', None)
-                    if analysis_results is not None:
-                        with open(serializer.validated_data['analysis_results'].temporary_file_path()) as f:
-                            if analysis_type == 'FBA':
-                                analysis_results = json.load(f, cls=CobraSolutionDecoder)
-                            if analysis_type == 'FVA':
-                                analysis_results = pd.read_json(f, typ='frame'),
-                    vizan_kwargs = {
-                        'model_filename': serializer.validated_data['model'].temporary_file_path(),
-                        'svg_filename': serializer.validated_data['svg'].temporary_file_path(),
-                        'analysis_type': analysis_type,
-                        'analysis_results': analysis_results,
-                        'output_filename': output_file.name,
-                        'intermediate_filename': intermediate_file.name,
-                    }
-                    perform_visualisation(**vizan_kwargs)
-            return serve(request, os.path.basename(output_file.name), os.path.dirname(output_file.name))
+            try:
+                with tempfile.NamedTemporaryFile(mode="w", delete=False) as output_file:
+                    with tempfile.NamedTemporaryFile(mode="w") as intermediate_file:
+                        analysis_type = serializer.validated_data.get("analysis_type", None) or 'FBA'
+                        analysis_results = serializer.validated_data.get('analysis_results', None)
+                        if analysis_results is not None:
+                            with open(serializer.validated_data['analysis_results'].temporary_file_path()) as f:
+                                if analysis_type == 'FBA':
+                                    analysis_results = json.load(f, cls=CobraSolutionDecoder)
+                                if analysis_type == 'FVA':
+                                    analysis_results = pd.read_json(f, typ='frame'),
+                        vizan_kwargs = {
+                            'model_filename': serializer.validated_data['model'].temporary_file_path(),
+                            'svg_filename': serializer.validated_data['svg'].temporary_file_path(),
+                            'analysis_type': analysis_type,
+                            'analysis_results': analysis_results,
+                            'output_filename': output_file.name,
+                            'intermediate_filename': intermediate_file.name,
+                        }
+                        try:
+                            perform_visualisation(**vizan_kwargs)
+                        except ExpatError as exc:
+                            traceback.print_exc()
+                            return Response({'svg': ['Error while parsing SVG: {}'.format(exc.args)]},
+                                            status=status.HTTP_400_BAD_REQUEST)
+                        except Exception as inst:
+                            return unknown_exception_logging(inst, "perform_visualisation",
+                                                             status.HTTP_500_INTERNAL_SERVER_ERROR)
+                return serve(request, os.path.basename(output_file.name), os.path.dirname(output_file.name))
+            except Exception as inst:
+                return unknown_exception_logging(inst, "after_valid_serializer", status.HTTP_500_INTERNAL_SERVER_ERROR)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+def unknown_exception_logging(inst, place, res_status):
+    errors = {"server": {
+        "place": place,
+        "exc_type": str(type(inst)),  # the exception instance
+        "exc_args": inst.args,
+        "traceback": traceback.format_exc()
+    }}  # arguments stored in .args
+    print(errors)
+    traceback.print_exc()
+    return Response(errors, status=res_status)
