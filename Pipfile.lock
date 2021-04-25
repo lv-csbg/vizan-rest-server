@@ -33,11 +33,11 @@
         },
         "django": {
             "hashes": [
-                "sha256:1226168be1b1c7efd0e66ee79b0e0b58b2caa7ed87717909cd8a57bb13a7079a",
-                "sha256:9a4635813e2d498a3c01b10c701fe4a515d76dd290aaa792ccb65ca4ccb6b038"
+                "sha256:2484f115891ab1a0e9ae153602a641fbc15d7894c036d79fb78662c0965d7954",
+                "sha256:2569f9dc5f8e458a5e988b03d6b7a02bda59b006d6782f4ea0fd590ed7336a64"
             ],
             "index": "pypi",
-            "version": "==2.2.10"
+            "version": "==2.2.20"
         },
         "djangorestframework": {
             "hashes": [
@@ -88,10 +88,10 @@
         },
         "optlang": {
             "hashes": [
-                "sha256:6e1cf89fcbfc7e3d15c4492045f6f71e4c92c08f0cf693ec02d4fe9072835925",
-                "sha256:8f0112aaba03f72d9051d3527a688113272806ce194f7f1fe1672f9af4c154ec"
+                "sha256:102fe84cae9568983be6c0dd23d2bc3aa1ce01aa1448316f088d1c72fcc0248f",
+                "sha256:666114f713119c8d590741e9d18e9df4e882bfc43e0ed0e55e9bf60d0afb59a0"
             ],
-            "version": "==1.5.0"
+            "version": "==1.5.1"
         },
         "pandas": {
             "hashes": [
@@ -174,10 +174,10 @@
         },
         "ruamel.yaml": {
             "hashes": [
-                "sha256:64b06e7873eb8e1125525ecef7345447d786368cadca92a7cd9b59eae62e95a3",
-                "sha256:bb48c514222702878759a05af96f4b7ecdba9b33cd4efcf25c86b882cef3a942"
+                "sha256:44bc6b54fddd45e4bc0619059196679f9e8b79c027f4131bb072e6a22f4d5e28",
+                "sha256:ac79fb25f5476e8e9ed1c53b8a2286d2c3f5dde49eb37dbcee5c7eb6a8415a22"
             ],
-            "version": "==0.16.13"
+            "version": "==0.17.4"
         },
         "ruamel.yaml.clib": {
             "hashes": [
